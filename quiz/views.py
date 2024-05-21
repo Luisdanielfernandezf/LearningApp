@@ -1,7 +1,6 @@
-import random
-from django.http import JsonResponse
+# views.py
 from django.shortcuts import render, get_object_or_404
-from .models import Subject, Question, Answer
+from .models import Subject, Question, Answer, Theory
 from .forms import TextAnswerForm, MultipleChoiceAnswerForm
 
 def subject_list(request):
@@ -23,8 +22,9 @@ def question_list(request, subject_id):
                 form = TextAnswerForm(request.POST, prefix=question_id)
                 if form.is_valid():
                     user_answer = form.cleaned_data['answer']
+                    correct = any(answer.text.lower() == user_answer.lower() and answer.is_correct for answer in question.answers.all())
                     results[question_id] = {
-                        'result': 'self-check',
+                        'result': 'correct' if correct else 'incorrect',
                         'text': question.text
                     }
             elif question.question_type == Question.MULTIPLE_CHOICE:
@@ -35,7 +35,12 @@ def question_list(request, subject_id):
                         'result': 'correct' if selected_answer.is_correct else 'incorrect',
                         'text': question.text
                     }
-        return JsonResponse({'results': results})
+            elif question.question_type == Question.TEXT:
+                results[question_id] = {
+                    'result': 'self-check',
+                    'text': question.text
+                }
+        return JsonResponse(results)
 
     for question in questions:
         if question.question_type == Question.TEXT:
@@ -45,3 +50,12 @@ def question_list(request, subject_id):
         forms.append((question, form))
 
     return render(request, 'quiz/question_list.html', {'subject': subject, 'subjects': subjects, 'forms': forms, 'results': results})
+
+def theory_list(request, subject_id):
+    subject = get_object_or_404(Subject, pk=subject_id)
+    theories = Theory.objects.filter(subject=subject)
+    return render(request, 'quiz/theory_list.html', {'subject': subject, 'theories': theories})
+
+def theory_detail(request, theory_id):
+    theory = get_object_or_404(Theory, pk=theory_id)
+    return render(request, 'quiz/theory_detail.html', {'theory': theory})

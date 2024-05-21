@@ -1,22 +1,27 @@
+# models.py
 from django.db import models
 
 class Subject(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=200)
+
+class Theory(models.Model):
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='theories')
+    title = models.CharField(max_length=200)
+    content = models.TextField()
 
     def __str__(self):
-        return self.name
+        return self.title
 
 class Question(models.Model):
-    TEXT = 'T'
-    MULTIPLE_CHOICE = 'M'
+    TEXT = 'text'
+    MULTIPLE_CHOICE = 'mc'
     QUESTION_TYPES = [
         (TEXT, 'Text'),
         (MULTIPLE_CHOICE, 'Multiple Choice'),
     ]
-
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    text = models.TextField()
-    question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default=TEXT)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='questions')
+    text = models.CharField(max_length=200)
+    question_type = models.CharField(max_length=20, choices=QUESTION_TYPES)
 
     def __str__(self):
         return self.text

@@ -1,0 +1,13 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ theory.title }}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'quiz/styles.css' %}">
+</head>
+<body>
+    <h1>{{ theory.title }}</h1>
+    <p>{{ theory.content|linebreaks }}</p>
+    <a href="{% url 'theory_list' theory.subject.id %}">Back to Theory List</a>
+</body>
+</html>

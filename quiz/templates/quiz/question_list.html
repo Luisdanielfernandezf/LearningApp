@@ -30,6 +30,13 @@
             {% endfor %}
         </select>
     </div>
+    <div class="dropdown-container">
+        <select id="mode-dropdown">
+            <option value="study">Study</option>
+            <option value="quiz">Quiz</option>
+        </select>
+        <button onclick="navigateToSection()">Go</button>
+    </div>
     <div id="selected-subject" style="margin-bottom: 20px;">Selected Subject: {{ subject.name }}</div>
     <form method="post" id="quiz-form">
         {% csrf_token %}
@@ -91,6 +98,18 @@
 
         function goBack() {
             window.location.href = "{% url 'question_list' subject.id %}";
+        }
+
+        function navigateToSection() {
+            var subjectId = document.getElementById('subject-dropdown').value;
+            var mode = document.getElementById('mode-dropdown').value;
+            var url;
+            if (mode === 'study') {
+                url = "{% url 'topic_list' 0 %}".replace('0', subjectId);
+            } else if (mode === 'quiz') {
+                url = "{% url 'question_list' 0 %}".replace('0', subjectId);
+            }
+            window.location.href = url;
         }
     </script>
 </body>

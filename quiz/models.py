@@ -16,12 +16,16 @@ class Topic(models.Model):
         return self.title
 
 class Question(models.Model):
+    TEXT = 'text'
+    MULTIPLE_CHOICE = 'multiple_choice'
+    
+    QUESTION_TYPE_CHOICES = [
+        (TEXT, 'Text'),
+        (MULTIPLE_CHOICE, 'Multiple Choice'),
+    ]
+    
     subject = models.ForeignKey(Subject, related_name='questions', on_delete=models.CASCADE)
     text = models.CharField(max_length=200)
-    QUESTION_TYPE_CHOICES = [
-        ('text', 'Text'),
-        ('multiple_choice', 'Multiple Choice'),
-    ]
     question_type = models.CharField(max_length=20, choices=QUESTION_TYPE_CHOICES)
 
     def __str__(self):

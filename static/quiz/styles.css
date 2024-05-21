@@ -38,3 +38,9 @@ input[type="submit"]:hover {
     color: red;
     font-weight: bold;
 }
+
+
+.topic-content img {
+    max-width: 100%;
+    height: auto;
+}

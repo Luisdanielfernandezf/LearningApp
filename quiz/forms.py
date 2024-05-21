@@ -11,8 +11,5 @@ class MultipleChoiceAnswerForm(forms.Form):
         super(MultipleChoiceAnswerForm, self).__init__(*args, **kwargs)
         self.fields['answer'].queryset = question.answers.all()
 
-
-
-
 class TextAnswerForm(forms.Form):
     answer = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'cols': 50}), label='Your Answer', max_length=400)

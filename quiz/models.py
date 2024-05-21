@@ -11,9 +11,11 @@ class Topic(models.Model):
     subject = models.ForeignKey(Subject, related_name='topics', on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     content = models.TextField()
+    image = models.ImageField(upload_to='images/', blank=True, null=True)  # Ensure this line is present
 
     def __str__(self):
         return self.title
+
 
 class Question(models.Model):
     TEXT = 'text'

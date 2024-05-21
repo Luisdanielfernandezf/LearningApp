@@ -1,0 +1,97 @@
+{% load static quiz_extras %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Questions for {{ subject.name }}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'quiz/styles.css' %}">
+    <style>
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .self-check {
+            color: blue;
+        }
+        .dropdown-container {
+            width: 300px; /* Adjust this value as needed */
+            margin: 0 auto;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Questions for {{ subject.name }}</h1>
+    <div class="dropdown-container">
+        <select id="subject-dropdown">
+            {% for subj in subjects %}
+            <option value="{{ subj.id }}" {% if subj.id == subject.id %}selected{% endif %}>{{ subj.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div id="selected-subject" style="margin-bottom: 20px;">Selected Subject: {{ subject.name }}</div>
+    <form method="post" id="quiz-form">
+        {% csrf_token %}
+        {% for question, form in forms %}
+        <div class="question-container" data-question-id="{{ question.id }}">
+            <h3>{{ question.text }}</h3>
+            {{ form.as_p }}
+            <input type="hidden" name="question_id" value="{{ question.id }}">
+        </div>
+        {% endfor %}
+        <button type="submit">Submit Answers</button>
+    </form>
+    <div>
+        <h2>Results</h2>
+        <div id="results-container"></div>
+    </div>
+    <script>
+        document.getElementById('subject-dropdown').addEventListener('change', function() {
+            var subjectId = this.value;
+            var url = "{% url 'question_list' 0 %}".replace('0', subjectId);
+            window.location.href = url;
+        });
+
+        document.getElementById('quiz-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var form = this;
+            var formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(response => response.json())
+              .then(data => {
+                  console.log('AJAX response:', data); // Debug line
+                  // Update the page with the results
+                  const results = data.results;
+                  for (const questionId in results) {
+                      const resultData = results[questionId];
+                      const questionDiv = document.querySelector(`.question-container[data-question-id="${questionId}"]`);
+                      questionDiv.classList.remove('correct', 'incorrect', 'self-check');
+                      questionDiv.classList.add(resultData.result);
+                  }
+                  // Update the results section
+                  const resultsDiv = document.getElementById('results-container');
+                  resultsDiv.innerHTML = '';
+                  for (const questionId in results) {
+                      const resultData = results[questionId];
+                      const p = document.createElement('p');
+                      p.classList.add(resultData.result);
+                      p.textContent = `${resultData.text} - Result: ${resultData.result}`;
+                      resultsDiv.appendChild(p);
+                  }
+              }).catch(error => {
+                  console.error('Error:', error); // Debug line
+              });
+        });
+
+        function goBack() {
+            window.location.href = "{% url 'question_list' subject.id %}";
+        }
+    </script>
+</body>
+</html>

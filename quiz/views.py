@@ -48,7 +48,10 @@ def question_list(request, subject_id):
             form = TextAnswerForm(prefix=str(question.id))
         elif question.question_type == Question.MULTIPLE_CHOICE:
             form = MultipleChoiceAnswerForm(question=question, prefix=str(question.id))
-        forms.append((question, form))
+        else:
+            form = None  # Just in case you have another type not handled
+        if form:  # Only append if form is not None
+            forms.append((question, form))
 
     return render(request, 'quiz/question_list.html', {'subject': subject, 'subjects': subjects, 'forms': forms, 'results': results})
 

@@ -30,7 +30,7 @@
         <select id="subject-dropdown">
             <option value="" selected disabled>Select Subject</option>
             {% for subj in subjects %}
-            <option value="{{ subj.id }}" {% if subj.id == subject.id %}selected{% endif %}>{{ subj.name }}</option>
+            <option value="{{ subj.id }}">{{ subj.name }}</option>
             {% endfor %}
         </select>
     </div>
@@ -41,15 +41,15 @@
         </select>
         <button id="go-button">Go</button>
     </div>
-    <div id="middle-section" class="hidden">
+    <div id="middle-section">
         <div id="selected-subject" style="margin-bottom: 20px;">Selected Subject: {{ subject.name }}</div>
-        <form method="post" id="quiz-form">
+        <form method="post" id="quiz-form" action="{% url 'question_list' subject.id %}">
             {% csrf_token %}
             {% for question, form in forms %}
             <div class="question-container" data-question-id="{{ question.id }}">
                 <h3>{{ question.text }}</h3>
                 {{ form.as_p }}
-                <input type="hidden" name="question_id" value="{{ question.id }}">
+                <input name="question_id" value="{{ question.id }}">
             </div>
             {% endfor %}
             <button type="submit">Submit Answers</button>
@@ -60,16 +60,20 @@
         <div id="results-container"></div>
     </div>
     <script>
+        console.log("Script Loaded"); // Debug line
+    
         document.getElementById('subject-dropdown').addEventListener('change', function() {
             var subjectId = this.value;
+            console.log('Subject selected:', subjectId); // Debug line
             if (subjectId) {
                 document.getElementById('middle-section').classList.remove('hidden');
             }
         });
-
+    
         document.getElementById('go-button').addEventListener('click', function() {
             var subjectId = document.getElementById('subject-dropdown').value;
             var mode = document.getElementById('mode-dropdown').value;
+            console.log('Go button clicked. Subject ID:', subjectId, 'Mode:', mode); // Debug line
             if (!subjectId) {
                 alert("Please select a subject first.");
                 return;
@@ -80,48 +84,51 @@
             } else if (mode === 'quiz') {
                 url = "{% url 'question_list' 0 %}".replace('0', subjectId);
             }
+            console.log('Redirecting to URL:', url); // Debug line
             window.location.href = url;
         });
-
+    
         document.getElementById('quiz-form').addEventListener('submit', function(event) {
             event.preventDefault();
             var form = this;
             var formData = new FormData(form);
+            console.log('Form submitted. FormData:', formData); // Debug line
             fetch(form.action, {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             }).then(response => response.json())
-              .then(data => {
-                  console.log('AJAX response:', data); // Debug line
-                  // Update the page with the results
-                  const results = data.results;
-                  for (const questionId in results) {
-                      const resultData = results[questionId];
-                      const questionDiv = document.querySelector(`.question-container[data-question-id="${questionId}"]`);
-                      questionDiv.classList.remove('correct', 'incorrect', 'self-check');
-                      questionDiv.classList.add(resultData.result);
-                  }
-                  // Update the results section
-                  const resultsDiv = document.getElementById('results-container');
-                  resultsDiv.innerHTML = '';
-                  for (const questionId in results) {
-                      const resultData = results[questionId];
-                      const p = document.createElement('p');
-                      p.classList.add(resultData.result);
-                      p.textContent = `${resultData.text} - Result: ${resultData.result}`;
-                      resultsDiv.appendChild(p);
-                  }
-              }).catch(error => {
-                  console.error('Error:', error); // Debug line
-              });
+            .then(data => {
+                console.log('AJAX response:', data); // Debug line
+                const results = data.results;
+                for (const questionId in results) {
+                    const resultData = results[questionId];
+                    const questionDiv = document.querySelector(`.question-container[data-question-id="${questionId}"]`);
+                    questionDiv.classList.remove('correct', 'incorrect', 'self-check');
+                    questionDiv.classList.add(resultData.result);
+                }
+                const resultsDiv = document.getElementById('results-container');
+                resultsDiv.innerHTML = '';
+                for (const questionId in results) {
+                    const resultData = results[questionId];
+                    const p = document.createElement('p');
+                    p.classList.add(resultData.result);
+                    p.textContent = `${resultData.text} - Result: ${resultData.result}`;
+                    resultsDiv.appendChild(p);
+                }
+            }).catch(error => {
+                console.error('Error:', error); // Debug line
+            });
         });
 
+    
         function goBack() {
             window.location.href = "{% url 'question_list' subject.id %}";
         }
     </script>
+    
 </body>
 </html>

@@ -2,14 +2,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ subject.name }} - Topic List</title>
+    <title>Topics for {{ subject.name }}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'quiz/styles.css' %}">
 </head>
 <body>
     <h1>Topics for {{ subject.name }}</h1>
     <ul>
         {% for topic in topics %}
-        <li><a href="{% url 'topic_detail' topic.id %}">{{ topic.title }}</a></li>
+            <li>
+                <a href="{% url 'topic_detail' topic.id %}">{{ topic.title }}</a>
+            </li>
         {% endfor %}
     </ul>
     <a href="{% url 'subject_list' %}">Back to Subject List</a>

@@ -7,7 +7,12 @@
 </head>
 <body>
     <h1>{{ topic.title }}</h1>
-    <p>{{ topic.content }}</p>
-    <a href="{% url 'topic_list' topic.subject.id %}">Back to Topic List</a>
+    <div class="topic-content">
+        <p>{{ topic.content }}</p>
+        {% if topic.image %}
+            <img src="{{ topic.image.url }}" alt="{{ topic.title }}">
+        {% endif %}
+    </div>
+    <a href="{% url 'subject_list' %}">Back to Subjects</a>
 </body>
 </html>

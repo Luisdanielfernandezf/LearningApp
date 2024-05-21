@@ -1,0 +1,13 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ topic.title }}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'quiz/styles.css' %}">
+</head>
+<body>
+    <h1>{{ topic.title }}</h1>
+    <p>{{ topic.content }}</p>
+    <a href="{% url 'topic_list' topic.subject.id %}">Back to Topic List</a>
+</body>
+</html>

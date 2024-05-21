@@ -1,11 +1,14 @@
-# models.py
 from django.db import models
 
 class Subject(models.Model):
     name = models.CharField(max_length=200)
+    description = models.TextField(default='No description provided.')
 
-class Theory(models.Model):
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='theories')
+    def __str__(self):
+        return self.name
+
+class Topic(models.Model):
+    subject = models.ForeignKey(Subject, related_name='topics', on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     content = models.TextField()
 
@@ -13,32 +16,21 @@ class Theory(models.Model):
         return self.title
 
 class Question(models.Model):
-    TEXT = 'text'
-    MULTIPLE_CHOICE = 'mc'
-    QUESTION_TYPES = [
-        (TEXT, 'Text'),
-        (MULTIPLE_CHOICE, 'Multiple Choice'),
-    ]
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='questions')
+    subject = models.ForeignKey(Subject, related_name='questions', on_delete=models.CASCADE)
     text = models.CharField(max_length=200)
-    question_type = models.CharField(max_length=20, choices=QUESTION_TYPES)
+    QUESTION_TYPE_CHOICES = [
+        ('text', 'Text'),
+        ('multiple_choice', 'Multiple Choice'),
+    ]
+    question_type = models.CharField(max_length=20, choices=QUESTION_TYPE_CHOICES)
 
     def __str__(self):
         return self.text
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
+    question = models.ForeignKey(Question, related_name='answers', on_delete=models.CASCADE)
     text = models.CharField(max_length=200)
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):
         return self.text
-
-
-class Topic(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='topics')
-
-    def __str__(self):
-        return self.title

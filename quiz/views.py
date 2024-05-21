@@ -1,6 +1,7 @@
-# views.py
+import random
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
-from .models import Subject, Question, Answer, Theory
+from .models import Subject, Question, Answer, Topic
 from .forms import TextAnswerForm, MultipleChoiceAnswerForm
 
 def subject_list(request):
@@ -51,11 +52,11 @@ def question_list(request, subject_id):
 
     return render(request, 'quiz/question_list.html', {'subject': subject, 'subjects': subjects, 'forms': forms, 'results': results})
 
-def theory_list(request, subject_id):
+def topic_list(request, subject_id):
     subject = get_object_or_404(Subject, pk=subject_id)
-    theories = Theory.objects.filter(subject=subject)
-    return render(request, 'quiz/theory_list.html', {'subject': subject, 'theories': theories})
+    topics = Topic.objects.filter(subject=subject)
+    return render(request, 'quiz/topic_list.html', {'subject': subject, 'topics': topics})
 
-def theory_detail(request, theory_id):
-    theory = get_object_or_404(Theory, pk=theory_id)
-    return render(request, 'quiz/theory_detail.html', {'theory': theory})
+def topic_detail(request, topic_id):
+    topic = get_object_or_404(Topic, pk=topic_id)
+    return render(request, 'quiz/topic_detail.html', {'topic': topic})

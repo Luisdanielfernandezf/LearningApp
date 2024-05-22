@@ -9,11 +9,14 @@
     <h1>Topics for {{ subject.name }}</h1>
     <ul>
         {% for topic in topics %}
-            <li>
-                <a href="{% url 'topic_detail' topic.id %}">{{ topic.title }}</a>
-            </li>
+        <li>
+            <h2>{{ topic.title }}</h2>
+            <p>{{ topic.content }}</p>
+            {% if topic.image %}
+            <img src="{{ topic.image.url }}" alt="{{ topic.title }}">
+            {% endif %}
+        </li>
         {% endfor %}
     </ul>
-    <a href="{% url 'subject_list' %}">Back to Subject List</a>
 </body>
 </html>

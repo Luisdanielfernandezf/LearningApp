@@ -9,13 +9,17 @@ def subject_list(request):
     return render(request, 'quiz/subject_list.html', {'subjects': subjects})
 
 def question_list(request, subject_id):
+    print("question_list view called with subject_id:", subject_id)  # Debug line
     subject = get_object_or_404(Subject, pk=subject_id)
     subjects = Subject.objects.all()
     questions = list(Question.objects.filter(subject=subject))
-    random.shuffle(questions)
+    random.shuffle(questions)  # Shuffle questions
     forms = []
     results = {}
 
+    print("Questions fetched:", questions)  # Debug line
+
+    # Handle AJAX POST request
     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         for question in questions:
             question_id = str(question.id)
@@ -36,25 +40,34 @@ def question_list(request, subject_id):
                         'result': 'correct' if selected_answer.is_correct else 'incorrect',
                         'text': question.text
                     }
-            elif question.question_type == Question.TEXT:
+            elif question.question_type == Question.SELF_CHECK:
                 results[question_id] = {
                     'result': 'self-check',
                     'text': question.text
                 }
         return JsonResponse(results)
 
+    # Prepare forms for GET request
     for question in questions:
-        if question.question_type == Question.TEXT:
+        if question.question_type == 'T':  # Text
             form = TextAnswerForm(prefix=str(question.id))
-        elif question.question_type == Question.MULTIPLE_CHOICE:
+            print(f"Created TextAnswerForm for question: {question.text}")  # Debug line
+        elif question.question_type == 'M':  # Multiple Choice
             form = MultipleChoiceAnswerForm(question=question, prefix=str(question.id))
+            print(f"Created MultipleChoiceAnswerForm for question: {question.text}")  # Debug line
+        elif question.question_type == 'S':  # Self Check
+            form = None  # You might want to handle this if needed
+            print(f"Self Check type question found: {question.text}")  # Debug line
         else:
-            form = None  # Just in case you have another type not handled
-        if form:  # Only append if form is not None
+            form = None  # Ensure form is not None for unsupported types
+            print(f"Question type not handled: {question.question_type} for question: {question.text}")  # Debug line
+        if form:
             forms.append((question, form))
+            print("Form appended for question:", question.text)  # Debug line
+
+    print("Forms prepared:", forms)  # Debug line
 
     return render(request, 'quiz/question_list.html', {'subject': subject, 'subjects': subjects, 'forms': forms, 'results': results})
-
 
 def topic_list(request, subject_id):
     subject = get_object_or_404(Subject, pk=subject_id)

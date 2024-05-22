@@ -11,27 +11,27 @@ class Topic(models.Model):
     subject = models.ForeignKey(Subject, related_name='topics', on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     content = models.TextField()
-    image = models.ImageField(upload_to='images/', blank=True, null=True)  # Ensure this line is present
+    image = models.ImageField(upload_to='images/', blank=True, null=True)  # Add image field
 
     def __str__(self):
         return self.title
 
 
 class Question(models.Model):
-    TEXT = 'text'
-    MULTIPLE_CHOICE = 'multiple_choice'
-    
-    QUESTION_TYPE_CHOICES = [
+    TEXT = 'T'
+    MULTIPLE_CHOICE = 'M'
+    SELF_CHECK = 'S'
+    QUESTION_TYPES = [
         (TEXT, 'Text'),
         (MULTIPLE_CHOICE, 'Multiple Choice'),
+        (SELF_CHECK, 'Self Check'),
     ]
     
-    subject = models.ForeignKey(Subject, related_name='questions', on_delete=models.CASCADE)
+    question_type = models.CharField(max_length=1, choices=QUESTION_TYPES)
     text = models.CharField(max_length=200)
-    question_type = models.CharField(max_length=20, choices=QUESTION_TYPE_CHOICES)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    # other fields
 
-    def __str__(self):
-        return self.text
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, related_name='answers', on_delete=models.CASCADE)
